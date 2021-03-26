@@ -1,4 +1,4 @@
-package com.lomovskiy.test.ex.proc
+package com.lomovskiy.test.ex.proc.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,15 +8,22 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.lomovskiy.test.ex.proc.R
 import com.lomovskiy.test.ex.proc.databinding.ScreenWeatherBinding
+import com.lomovskiy.test.ex.proc.domain.WeatherInteractor
 import com.lomovskiy.test.ex.proc.domain.WeatherSnapshotEntity
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ScreenWeatherViewModel : ViewModel() {
+class ScreenWeatherViewModel(
+    private val interactor: WeatherInteractor
+) : ViewModel() {
 
     private val states = MutableLiveData(ScreenWeather.State.empty())
+
+    init {
+        fetchWeather()
+    }
 
     fun getStates(): LiveData<ScreenWeather.State> {
         return states
@@ -26,11 +33,17 @@ class ScreenWeatherViewModel : ViewModel() {
         when (action) {
             Action.OnRefresh -> {
                 states.value = states.value?.copy(refreshing = true)
-                viewModelScope.launch {
-                    delay(3000)
-                    states.value = states.value?.copy(refreshing = false)
-                }
+                fetchWeather()
             }
+        }
+    }
+
+    private fun fetchWeather() {
+        viewModelScope.launch {
+            val latestWeatherSnapshot: WeatherSnapshotEntity = interactor.getLatestWeatherSnapshot()
+            states.value = states.value?.copy(
+                weatherSnapshotEntity = latestWeatherSnapshot
+            )
         }
     }
 
@@ -40,12 +53,16 @@ class ScreenWeatherViewModel : ViewModel() {
 
 }
 
-class ScreenWeather : Fragment(R.layout.screen_weather), SwipeRefreshLayout.OnRefreshListener {
+class ScreenWeather(
+    private val interactor: WeatherInteractor
+) : Fragment(R.layout.screen_weather), ViewModelProvider.Factory, SwipeRefreshLayout.OnRefreshListener {
 
     private var _binding: ScreenWeatherBinding? = null
     private val binding get() = _binding!!
 
-    private val screenVM: ScreenWeatherViewModel by viewModels()
+    private val screenVM: ScreenWeatherViewModel by viewModels(
+        factoryProducer = { this }
+    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ScreenWeatherBinding.inflate(inflater, container, false)
@@ -61,6 +78,10 @@ class ScreenWeather : Fragment(R.layout.screen_weather), SwipeRefreshLayout.OnRe
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        return ScreenWeatherViewModel(interactor) as T
     }
 
     override fun onRefresh() {
