@@ -42,7 +42,8 @@ class ScreenWeatherViewModel(
         viewModelScope.launch {
             val latestWeatherSnapshot: WeatherSnapshotEntity = interactor.getLatestWeatherSnapshot()
             states.value = states.value?.copy(
-                weatherSnapshotEntity = latestWeatherSnapshot
+                weatherSnapshotEntity = latestWeatherSnapshot,
+                refreshing = false
             )
         }
     }

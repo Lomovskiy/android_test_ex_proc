@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.commit
-import com.lomovskiy.test.ex.proc.data.WeatherSnapshotsRepoImpl
+import com.lomovskiy.test.ex.proc.data.repo.WeatherSnapshotsRepoImpl
 import com.lomovskiy.test.ex.proc.domain.WeatherInteractor
 import com.lomovskiy.test.ex.proc.domain.WeatherInteractorImpl
 
