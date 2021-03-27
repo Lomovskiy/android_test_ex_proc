@@ -8,6 +8,4 @@ interface WeatherSnapshotsRepo {
 
     fun readAll(): List<WeatherSnapshotEntity>
 
-    suspend fun fetch()
-
 }

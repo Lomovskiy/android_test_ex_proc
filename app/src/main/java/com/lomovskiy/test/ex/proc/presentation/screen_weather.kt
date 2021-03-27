@@ -92,7 +92,7 @@ class ScreenWeather(
     private fun renderState(state: State) {
         binding.root.isRefreshing = state.refreshing
         state.weatherSnapshotEntity?.let { weatherSnapshotEntity: WeatherSnapshotEntity ->
-            binding.labelTemperature.text = weatherSnapshotEntity.temperature.toString()
+            binding.labelTemperature.text = weatherSnapshotEntity.temp.toString()
             binding.labelSpeed.text = weatherSnapshotEntity.speed.toString()
             Picasso.get()
                     .load(weatherSnapshotEntity.imagePath)

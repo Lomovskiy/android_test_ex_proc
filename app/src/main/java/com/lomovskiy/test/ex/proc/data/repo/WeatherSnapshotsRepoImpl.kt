@@ -1,5 +1,6 @@
 package com.lomovskiy.test.ex.proc.data.repo
 
+import com.lomovskiy.test.ex.proc.data.IMAGE_PATH_TEMPLATE
 import com.lomovskiy.test.ex.proc.data.remoteApi
 import com.lomovskiy.test.ex.proc.domain.WeatherSnapshotEntity
 import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotsRepo
@@ -24,26 +25,6 @@ class WeatherSnapshotsRepoImpl(
 
     override fun readAll(): List<WeatherSnapshotEntity> {
         return cache
-    }
-
-    override suspend fun fetch() {
-        withContext(dispatcher) {
-            val response = remoteApi.getWeatherSnapshotByCoordinates(
-                0.0,
-                0.0
-            ).execute()
-            if (!response.isSuccessful) {
-                return@withContext
-            }
-            val json = JSONObject(String(response.body()!!.bytes()))
-            val weatherSnapshotEntity: WeatherSnapshotEntity = WeatherSnapshotEntity(
-                json.getJSONObject("current").getDouble("temp"),
-                json.getJSONObject("current").getDouble("wind_speed"),
-                "1",
-                Instant.now().epochSecond
-            )
-            create(weatherSnapshotEntity)
-        }
     }
 
 }

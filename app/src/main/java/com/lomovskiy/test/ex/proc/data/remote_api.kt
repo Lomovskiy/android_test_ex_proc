@@ -11,6 +11,7 @@ import retrofit2.http.Query
 
 internal const val REQUIRE_HEADER_API_KEY = "Authorization: true"
 internal const val ENDPOINT = "https://api.openweathermap.org/data/2.5/"
+internal const val IMAGE_PATH_TEMPLATE = "http://openweathermap.org/img/wn/%s@2x.png"
 
 
 val remoteApi: RemoteApi = Retrofit.Builder()
