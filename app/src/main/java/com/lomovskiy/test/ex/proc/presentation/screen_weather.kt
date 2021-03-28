@@ -1,15 +1,21 @@
 package com.lomovskiy.test.ex.proc.presentation
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.gms.common.api.ResolvableApiException
+import com.lomovskiy.lib.ui.Command
 import com.lomovskiy.test.ex.proc.R
 import com.lomovskiy.test.ex.proc.databinding.ScreenWeatherBinding
+import com.lomovskiy.test.ex.proc.domain.LocationException
 import com.lomovskiy.test.ex.proc.domain.WeatherInteractor
 import com.lomovskiy.test.ex.proc.domain.WeatherSnapshotEntity
 import com.squareup.picasso.Picasso
@@ -20,6 +26,7 @@ class ScreenWeatherViewModel(
 ) : ViewModel() {
 
     private val states = MutableLiveData(ScreenWeather.State.empty())
+    private val commands = MutableLiveData<Command<ScreenWeather.Command>>()
 
     init {
         fetchWeather()
@@ -27,6 +34,10 @@ class ScreenWeatherViewModel(
 
     fun getStates(): LiveData<ScreenWeather.State> {
         return states
+    }
+
+    fun getCommands(): LiveData<Command<ScreenWeather.Command>> {
+        return commands
     }
 
     fun handleAction(action: Action) {
@@ -40,11 +51,17 @@ class ScreenWeatherViewModel(
 
     private fun fetchWeather() {
         viewModelScope.launch {
-            val latestWeatherSnapshot: WeatherSnapshotEntity = interactor.getLatestWeatherSnapshot()
-            states.value = states.value?.copy(
-                weatherSnapshotEntity = latestWeatherSnapshot,
-                refreshing = false
-            )
+            try {
+                val latestWeatherSnapshot: WeatherSnapshotEntity = interactor.getLatestWeatherSnapshot()
+                states.value = states.value?.copy(
+                    weatherSnapshotEntity = latestWeatherSnapshot,
+                    refreshing = false
+                )
+            } catch (e: LocationException) {
+                if (e is LocationException.DisabledLocationException) {
+                    commands.value = Command(ScreenWeather.Command.ResolveLocationException(e.cs))
+                }
+            }
         }
     }
 
@@ -65,6 +82,17 @@ class ScreenWeather(
         factoryProducer = { this }
     )
 
+    private val permissionLauncher: ActivityResultLauncher<String> = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            screenVM.getStates().observe(viewLifecycleOwner, Observer(::renderState))
+            screenVM.getCommands().observe(viewLifecycleOwner, Observer {
+                it.get()?.let(::handleCommand)
+            })
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ScreenWeatherBinding.inflate(inflater, container, false)
         return binding.root
@@ -73,7 +101,7 @@ class ScreenWeather(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.root.setOnRefreshListener(this)
-        screenVM.getStates().observe(viewLifecycleOwner, Observer(::renderState))
+        permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     override fun onDestroyView() {
@@ -89,6 +117,14 @@ class ScreenWeather(
         screenVM.handleAction(ScreenWeatherViewModel.Action.OnRefresh)
     }
 
+    private fun handleCommand(command: Command) {
+        when (command) {
+            is Command.ResolveLocationException -> {
+                command.e.startResolutionForResult(requireActivity(), 1)
+            }
+        }
+    }
+
     private fun renderState(state: State) {
         binding.root.isRefreshing = state.refreshing
         state.weatherSnapshotEntity?.let { weatherSnapshotEntity: WeatherSnapshotEntity ->
@@ -98,6 +134,10 @@ class ScreenWeather(
                     .load(weatherSnapshotEntity.imagePath)
                     .into(binding.imageWeather)
         }
+    }
+
+    sealed class Command {
+        class ResolveLocationException(val e: ResolvableApiException) : Command()
     }
 
     data class State(
