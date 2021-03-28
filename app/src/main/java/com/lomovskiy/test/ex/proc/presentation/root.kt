@@ -5,9 +5,9 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.commit
-import com.lomovskiy.test.ex.proc.data.repo.WeatherSnapshotsRepoImpl
+import com.lomovskiy.test.ex.proc.AppLoader
 import com.lomovskiy.test.ex.proc.domain.WeatherInteractor
-import com.lomovskiy.test.ex.proc.domain.WeatherInteractorImpl
+import javax.inject.Inject
 
 class ScreensFactory(
     private val interactor: WeatherInteractor
@@ -21,9 +21,11 @@ class ScreensFactory(
 
 class MainActivity : AppCompatActivity() {
 
-    private val interactor: WeatherInteractor = WeatherInteractorImpl(WeatherSnapshotsRepoImpl())
+    @Inject
+    lateinit var interactor: WeatherInteractor
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppLoader.appComponent.inject(this)
         supportFragmentManager.fragmentFactory = ScreensFactory(interactor)
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {

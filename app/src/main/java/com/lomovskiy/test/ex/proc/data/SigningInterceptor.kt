@@ -3,8 +3,9 @@ package com.lomovskiy.test.ex.proc.data
 import com.lomovskiy.test.ex.proc.domain.repo.OpenWeatherMapAppKeysRepo
 import okhttp3.Interceptor
 import okhttp3.Response
+import javax.inject.Inject
 
-class SigningInterceptor(
+class SigningInterceptor @Inject constructor(
     private val openWeatherMapAppKeysRepo: OpenWeatherMapAppKeysRepo
 ) : Interceptor {
 

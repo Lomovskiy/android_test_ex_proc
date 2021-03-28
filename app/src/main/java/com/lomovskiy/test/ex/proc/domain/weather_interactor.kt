@@ -1,8 +1,8 @@
 package com.lomovskiy.test.ex.proc.domain
 
-import androidx.work.WorkManager
 import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotsRepo
 import org.threeten.bp.Instant
+import javax.inject.Inject
 
 interface WeatherInteractor {
 
@@ -10,9 +10,8 @@ interface WeatherInteractor {
 
 }
 
-class WeatherInteractorImpl(
-    private val weatherSnapshotsRepo: WeatherSnapshotsRepo,
-    private val workManager: WorkManager
+class WeatherInteractorImpl @Inject constructor(
+    private val weatherSnapshotsRepo: WeatherSnapshotsRepo
 ) : WeatherInteractor {
 
     override suspend fun getLatestWeatherSnapshot(): WeatherSnapshotEntity {

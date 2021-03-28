@@ -1,18 +1,13 @@
 package com.lomovskiy.test.ex.proc.data.repo
 
-import com.lomovskiy.test.ex.proc.data.IMAGE_PATH_TEMPLATE
-import com.lomovskiy.test.ex.proc.data.remoteApi
 import com.lomovskiy.test.ex.proc.domain.WeatherSnapshotEntity
 import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotsRepo
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import org.threeten.bp.Instant
-import retrofit2.Response
+import javax.inject.Inject
 
-class WeatherSnapshotsRepoImpl(
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+class WeatherSnapshotsRepoImpl @Inject constructor(
+    private val dispatcher: CoroutineDispatcher
 ) : WeatherSnapshotsRepo {
 
     private var cache: List<WeatherSnapshotEntity> = mutableListOf()
