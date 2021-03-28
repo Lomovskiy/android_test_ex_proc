@@ -7,10 +7,6 @@ import androidx.room.PrimaryKey
 @Entity(tableName = WeatherSnapshotDbEntity.TABLE_NAME)
 class WeatherSnapshotDbEntity(
 
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = COLUMN_NAME_LOCAL_ID)
-    var localId: Long? = null,
-
     @ColumnInfo(name = COLUMN_NAME_TEMP)
     val temp: Double,
 
@@ -21,7 +17,11 @@ class WeatherSnapshotDbEntity(
     val imagePath: String,
 
     @ColumnInfo(name = COLUMN_NAME_CREATED_TIMESTAMP)
-    val createdTimestamp: Long
+    val createdTimestamp: Long,
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = COLUMN_NAME_LOCAL_ID)
+    var localId: Long? = null
 
 ) {
 

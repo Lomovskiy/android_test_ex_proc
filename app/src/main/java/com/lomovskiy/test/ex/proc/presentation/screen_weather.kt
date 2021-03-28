@@ -52,7 +52,7 @@ class ScreenWeatherViewModel(
     private fun fetchWeather() {
         viewModelScope.launch {
             try {
-                val latestWeatherSnapshot: WeatherSnapshotEntity = interactor.getLatestWeatherSnapshot()
+                val latestWeatherSnapshot: WeatherSnapshotEntity = interactor.getWeatherSnapshot()
                 states.value = states.value?.copy(
                     weatherSnapshotEntity = latestWeatherSnapshot,
                     refreshing = false

@@ -1,30 +1,27 @@
 package com.lomovskiy.test.ex.proc.domain
 
-import android.location.Location
-import com.lomovskiy.test.ex.proc.domain.repo.LocationSnapshotsRepo
-import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotsRepo
+import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotRepo
 import org.threeten.bp.Instant
 import javax.inject.Inject
 
 interface WeatherInteractor {
 
-    suspend fun getLatestWeatherSnapshot(): WeatherSnapshotEntity
+    suspend fun getWeatherSnapshot(): WeatherSnapshotEntity
 
 }
 
 class WeatherInteractorImpl @Inject constructor(
-    private val weatherSnapshotsRepo: WeatherSnapshotsRepo,
-    private val locationSnapshotsRepo: LocationSnapshotsRepo
+    private val weatherSnapshotRepo: WeatherSnapshotRepo
 ) : WeatherInteractor {
 
-    override suspend fun getLatestWeatherSnapshot(): WeatherSnapshotEntity {
-        val locationSnapshot: Location? = locationSnapshotsRepo.getCurrent()
-        val latestWeatherSnapshot: WeatherSnapshotEntity? = weatherSnapshotsRepo.readAll().firstOrNull()
+    override suspend fun getWeatherSnapshot(): WeatherSnapshotEntity {
+        val latestWeatherSnapshot: WeatherSnapshotEntity? = weatherSnapshotRepo.read()
         val currentTimestamp: Long = Instant.now().epochSecond
         if (latestWeatherSnapshot == null || currentTimestamp - latestWeatherSnapshot.createdTimestamp > (1 * 60)) {
-
+            val newWeatherSnapshot: WeatherSnapshotEntity = weatherSnapshotRepo.fetch()
+            weatherSnapshotRepo.create(newWeatherSnapshot)
         }
-        return weatherSnapshotsRepo.readAll().first()
+        return weatherSnapshotRepo.read()!!
     }
 
 }

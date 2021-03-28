@@ -1,21 +1,24 @@
 package com.lomovskiy.test.ex.proc.di
 
 import android.content.Context
+import androidx.room.Room
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.SettingsClient
 import com.lomovskiy.test.ex.proc.data.ENDPOINT
 import com.lomovskiy.test.ex.proc.data.RemoteApi
 import com.lomovskiy.test.ex.proc.data.SigningInterceptor
+import com.lomovskiy.test.ex.proc.data.local.AppDatabase
+import com.lomovskiy.test.ex.proc.data.local.WeatherSnapshotsDao
 import com.lomovskiy.test.ex.proc.data.repo.GooglePlayServicesStatusRepoImpl
 import com.lomovskiy.test.ex.proc.data.repo.LocationSnapshotsRepoImpl
 import com.lomovskiy.test.ex.proc.data.repo.OpenWeatherMapAppKeysRepoImpl
-import com.lomovskiy.test.ex.proc.data.repo.WeatherSnapshotsRepoImpl
+import com.lomovskiy.test.ex.proc.data.repo.WeatherSnapshotRepoImpl
 import com.lomovskiy.test.ex.proc.domain.WeatherInteractor
 import com.lomovskiy.test.ex.proc.domain.WeatherInteractorImpl
 import com.lomovskiy.test.ex.proc.domain.repo.GooglePlayServicesStatusRepo
 import com.lomovskiy.test.ex.proc.domain.repo.LocationSnapshotsRepo
 import com.lomovskiy.test.ex.proc.domain.repo.OpenWeatherMapAppKeysRepo
-import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotsRepo
+import com.lomovskiy.test.ex.proc.domain.repo.WeatherSnapshotRepo
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,6 +32,18 @@ import javax.inject.Singleton
 abstract class AppModule {
 
     companion object {
+
+        @Provides
+        @Singleton
+        fun provideAppDatabase(context: Context): AppDatabase {
+            return Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase::class.java.name)
+                .build()
+        }
+
+        @Provides
+        fun provideWeatherSnapshotsDao(appDatabase: AppDatabase): WeatherSnapshotsDao {
+            return appDatabase.weatherSnapshotsDao()
+        }
 
         @Provides
         @Singleton
@@ -85,6 +100,6 @@ abstract class AppModule {
 
     @Binds
     @Singleton
-    abstract fun weatherSnapshotsRepo(impl: WeatherSnapshotsRepoImpl): WeatherSnapshotsRepo
+    abstract fun weatherSnapshotsRepo(impl: WeatherSnapshotRepoImpl): WeatherSnapshotRepo
 
 }
