@@ -19,7 +19,7 @@ class WeatherInteractorImpl(
         val latestWeatherSnapshot: WeatherSnapshotEntity? = weatherSnapshotsRepo.readAll().firstOrNull()
         val currentTimestamp: Long = Instant.now().epochSecond
         if (latestWeatherSnapshot == null || currentTimestamp - latestWeatherSnapshot.createdTimestamp > (1 * 60)) {
-            workManager.enqueue()
+
         }
         return weatherSnapshotsRepo.readAll().first()
     }
